@@ -1,0 +1,3 @@
+flutter_native_splash:
+  image: lib/assets/images/swiggy_logo.png
+  color: "ffffff"
