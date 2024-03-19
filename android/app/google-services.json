@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "59385363502",
+    "project_id": "swiggy-varun",
+    "storage_bucket": "swiggy-varun.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59385363502:android:b0daa9bf144a4169cd33bf",
+        "android_client_info": {
+          "package_name": "com.example.swiggy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfWlRrPUYL7_0ZxDT8d9DbaVAkknbSvAU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
