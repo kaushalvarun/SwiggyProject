@@ -1,4 +1,4 @@
-import 'package:swiggy/pages/auth/login_or_register_page.dart';
+import 'package:swiggy/pages/auth/login_page.dart';
 import 'package:swiggy/pages/home_page.dart';
 import 'package:swiggy/pages/splash_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,7 +23,7 @@ class AuthPage extends StatelessWidget {
         }
         // user not logged in
         else {
-          return const LoginOrRegister();
+          return const LoginPage();
         }
       },
     );

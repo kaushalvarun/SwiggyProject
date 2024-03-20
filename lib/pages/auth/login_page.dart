@@ -1,160 +1,198 @@
-import 'package:swiggy/components/general_components/my_button.dart';
-import 'package:swiggy/components/general_components/my_text_field.dart';
-import 'package:swiggy/util/error_msg_dialog.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:swiggy/pages/auth/otp_page.dart';
+import 'package:swiggy/services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
-  final Function() onTap;
-  const LoginPage({
-    super.key,
-    required this.onTap,
-  });
-
+  const LoginPage({super.key});
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  // text editing controllers
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+class LoginPageState extends State<LoginPage> {
+  // Text editing controllers for the mobile number field
+  final TextEditingController _mobileNumberController = TextEditingController();
+  Color buttonColor = const Color.fromARGB(225, 228, 226, 226);
+  Color textColor = Colors.black54;
 
-  // sign user in method
-  void signUserIn() async {
-    // loading circle
-    showDialog(
-      context: context,
-      builder: (context) {
-        return const Center(child: CircularProgressIndicator());
-      },
-    );
-
-    try {
-      Navigator.pop(context);
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.toLowerCase(),
-        password: _passwordController.text,
-      );
-    } on FirebaseAuthException catch (e) {
-      // WRONG username
-      if (e.code == "invalid-email") {
-        // ignore: use_build_context_synchronously
-        showErrorMessage(context, 'Wrong Username');
-      }
-
-      // WRONG password
-      else if (e.code == "INVALID_LOGIN_CREDENTIALS") {
-        // ignore: use_build_context_synchronously
-        showErrorMessage(context, 'Wrong Password');
-      }
-    }
-  }
+  final _formKey1 = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.amber[50], // bg color for login page
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  // logo
-                  Image.asset(
-                    'lib/assets/images/swiggy_logo.png',
-                    height: 175,
-                    width: 175,
-                  ),
-
-                  const SizedBox(
-                    height: 25,
-                  ),
-
-                  // welcome back
-                  const Text(
-                    'Welcome back, you\'ve been missed!',
-                    style: TextStyle(
+      appBar: AppBar(
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              GestureDetector(
+                onTap: () {},
+                child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 0, horizontal: 25),
+                    margin: const EdgeInsets.symmetric(horizontal: 25),
+                    decoration: BoxDecoration(
                       color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                  ),
-
-                  const SizedBox(
-                    height: 25,
-                  ),
-
-                  // username
-                  MyTextField(
-                    controller: _emailController,
-                    hintText: 'Enter email',
-                    obscureText: false,
-                  ),
-
-                  // password
-                  MyTextField(
-                    controller: _passwordController,
-                    hintText: 'Enter password',
-                    obscureText: true,
-                  ),
-
-                  // forgot password
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 25.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Forgot Password?',
+                    child: const Center(
+                      child: Text('Skip',
                           style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 15,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          )),
+                    )),
+              ),
+            ],
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter your mobile number\nto get OTP',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 20.0),
+
+            // mobile no field
+            Form(
+              key: _formKey1,
+              child: TextFormField(
+                controller: _mobileNumberController,
+                keyboardType: TextInputType.phone,
+                textInputAction: TextInputAction.done,
+                decoration: const InputDecoration(
+                  labelText: 'Mobile Number',
+                  labelStyle: TextStyle(color: Color.fromRGBO(244, 81, 30, 1)),
+                  prefixText: '+91 | ',
+                  hintText: '10 digit mobile number',
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color.fromRGBO(244, 81, 30, 1),
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color.fromRGBO(244, 81, 30, 1),
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                  ),
+                ),
+                validator: (value) {
+                  if (value!.length != 10) return "Invalid phone number";
+                  return null;
+                },
+                autofocus: true,
+                onChanged: (value) {
+                  if (value.length == 10) {
+                    setState(() {
+                      buttonColor = const Color.fromRGBO(244, 81, 30, 1);
+                      textColor = const Color.fromRGBO(255, 255, 255, 1);
+                    });
+                  } else {
+                    setState(() {
+                      buttonColor = const Color.fromARGB(225, 228, 226, 226);
+                      textColor = Colors.black54;
+                    });
+                  }
+                },
+              ),
+            ),
+
+            const SizedBox(height: 20.0),
+
+            // get OTP button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  AuthService.sendOTP(
+                      phoneNo: _mobileNumberController.text,
+                      errorHandle: () {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text(
+                            "Error in sending OTP",
+                            style: TextStyle(color: Colors.white),
                           ),
-                        ),
-                      ],
+                          backgroundColor: Colors.red,
+                        ));
+                      },
+                      nextStep: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OTPPage(
+                              mobNo: _mobileNumberController.text,
+                            ),
+                          ),
+                        );
+                      });
+                },
+                style: ButtonStyle(
+                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                      const EdgeInsets.symmetric(vertical: 20)),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-
-                  const SizedBox(height: 25),
-
-                  // sign in button
-                  MyButton(
-                    onTap: signUserIn,
-                    msg: 'Sign In',
-                    textColor: Colors.white,
-                    buttonColor: Colors.black,
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(buttonColor),
+                ),
+                child: Text(
+                  "Get OTP",
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
+                ),
+              ),
+            ),
 
-                  const SizedBox(height: 25),
-
-                  // not a member? register now
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Not a member?',
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: widget.onTap,
-                        child: Text(
-                          'Register Now',
-                          style: TextStyle(
-                              color: Colors.blue[700],
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  )
+            // Terms & Conditions text
+            const SizedBox(height: 20.0),
+            const Text.rich(
+              TextSpan(
+                text: 'By clicking, I accept the ',
+                style: TextStyle(fontSize: 15.0),
+                children: [
+                  TextSpan(
+                    text: 'terms of service',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
+                      fontSize: 15.0,
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' and ',
+                    style: TextStyle(fontSize: 15.0),
+                  ),
+                  TextSpan(
+                    text: 'privacy policy',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
+                      fontSize: 15.0,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-        ));
+          ],
+        ),
+      ),
+    );
   }
 }
