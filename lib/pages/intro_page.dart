@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:swiggy/components/general_components/my_button.dart';
-import 'package:swiggy/pages/auth.dart';
+import 'package:swiggy/pages/auth/auth.dart';
 import 'package:video_player/video_player.dart';
 
 class IntroPage extends StatefulWidget {
@@ -64,18 +64,24 @@ class _IntroPageState extends State<IntroPage> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 20),
             color: Colors.black87,
-            child: MyButton(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => const AuthPage(),
-                  ),
-                );
-              },
-              msg: 'Get Started',
-              buttonColor: Colors.deepOrange[600]!,
-              textColor: Colors.white,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                MyButton(
+                  width: 250,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => const AuthPage(),
+                      ),
+                    );
+                  },
+                  msg: 'Get Started',
+                  buttonColor: Colors.deepOrange[600]!,
+                  textColor: Colors.white,
+                ),
+              ],
             ),
           ),
         ],

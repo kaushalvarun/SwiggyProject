@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:swiggy/components/general_components/heading.dart';
 import 'package:swiggy/pages/auth/otp_page.dart';
 import 'package:swiggy/services/auth_service.dart';
 
@@ -48,19 +49,12 @@ class LoginPageState extends State<LoginPage> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Enter your mobile number\nto get OTP',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 20.0),
+            const MyHeading(text: 'Enter your mobile number\nto get OTP'),
+            const SizedBox(height: 20),
 
             // mobile no field
             Form(

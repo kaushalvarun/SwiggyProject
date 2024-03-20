@@ -1,5 +1,6 @@
 import 'package:swiggy/pages/auth/login_page.dart';
-import 'package:swiggy/pages/home_page.dart';
+import 'package:swiggy/pages/get_location.dart';
+// import 'package:swiggy/pages/home_page.dart';
 import 'package:swiggy/pages/splash_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,8 @@ class AuthPage extends StatelessWidget {
         }
         // user logged in
         if (snapshot.hasData) {
-          return const HomePage();
+          print('change me to HomePage');
+          return const GetLocation();
         }
         // user not logged in
         else {

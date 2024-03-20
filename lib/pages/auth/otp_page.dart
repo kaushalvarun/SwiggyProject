@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:swiggy/pages/home_page.dart';
+import 'package:swiggy/components/general_components/heading.dart';
+import 'package:swiggy/pages/get_location.dart';
 import 'package:swiggy/services/auth_service.dart';
 
 class OTPPage extends StatefulWidget {
@@ -58,8 +59,8 @@ class OTPPageState extends State<OTPPage> {
     AuthService.loginWithOtp(otp: otpRecieved).then((value) {
       if (value == "Success") {
         Navigator.pop(context);
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const HomePage()));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const GetLocation()));
       } else {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -83,13 +84,7 @@ class OTPPageState extends State<OTPPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Enter otp to mobNo text
-            const Text(
-              'Enter the OTP sent to',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            const MyHeading(text: 'Enter the OTP sent to'),
             const SizedBox(height: 5.0),
             Text(
               widget.mobNo,
