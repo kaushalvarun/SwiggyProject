@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:swiggy/components/general_components/heading.dart';
 import 'package:swiggy/components/general_components/my_button.dart';
+import 'package:swiggy/pages/home_page.dart';
 
 class GetLocation extends StatefulWidget {
   const GetLocation({super.key});
@@ -10,6 +13,96 @@ class GetLocation extends StatefulWidget {
 }
 
 class _GetLocationState extends State<GetLocation> {
+  String? _currentAddress;
+  Position? _currentPosition;
+
+  Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    // Check if the context is still valid before interacting with it
+    if (!context.mounted) {
+      return false;
+    }
+
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Location services are disabled. Please enable the services'),
+        ),
+      );
+
+      return false;
+    }
+    // Check if the context is still valid before interacting with it
+    if (!context.mounted) {
+      return false;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+
+      // Check if the context is still valid before interacting with it
+      if (!context.mounted) {
+        return false;
+      }
+
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are denied')));
+        return false;
+      }
+    }
+
+    // Check if the context is still valid before interacting with it
+    if (!context.mounted) {
+      return false;
+    }
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Location permissions are permanently denied, we cannot request permissions.')));
+      return false;
+    }
+    return true;
+  }
+
+  // get latitude and longitude of user
+  Future<void> _getCurrentPosition() async {
+    final hasPermission = await _handleLocationPermission();
+    if (!hasPermission) return;
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) async {
+      setState(() {
+        _currentPosition = position;
+      });
+      await _getAddressFromLatLng(_currentPosition!);
+    }).catchError((e) {
+      // ignore: avoid_print
+      print(e);
+    });
+  }
+
+  // get address from latitude and longitude
+  Future<void> _getAddressFromLatLng(Position position) async {
+    await placemarkFromCoordinates(
+            _currentPosition!.latitude, _currentPosition!.longitude)
+        .then((List<Placemark> placemarks) {
+      Placemark place = placemarks[0];
+      setState(() {
+        _currentAddress =
+            '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
+      });
+    }).catchError((e) {
+      // ignore: avoid_print
+      print(e);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +150,20 @@ class _GetLocationState extends State<GetLocation> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   MyButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      await _getCurrentPosition();
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomePage(
+                              currentPosition: _currentPosition,
+                              currentAddress: _currentAddress,
+                            ),
+                          ),
+                        );
+                      }
+                    },
                     msg: 'Continue',
                     buttonColor: Colors.deepOrange[600]!,
                     textColor: Colors.white,
