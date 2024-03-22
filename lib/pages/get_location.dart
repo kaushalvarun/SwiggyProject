@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,6 +15,8 @@ class GetLocation extends StatefulWidget {
 }
 
 class _GetLocationState extends State<GetLocation> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String? _addressLabel;
   String? _currentAddress;
   Position? _currentPosition;
 
@@ -80,7 +84,22 @@ class _GetLocationState extends State<GetLocation> {
       setState(() {
         _currentPosition = position;
       });
+      // ge address
       await _getAddressFromLatLng(_currentPosition!);
+      // add details to db
+      try {
+        await _firestore
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({
+          'position': [_currentPosition!.latitude, _currentPosition!.longitude],
+          'address': _currentAddress!,
+          'addressLabel': _addressLabel!,
+        });
+      } catch (e) {
+        // ignore: avoid_print
+        print('Error adding address to user: $e');
+      }
     }).catchError((e) {
       // ignore: avoid_print
       print(e);
@@ -94,6 +113,7 @@ class _GetLocationState extends State<GetLocation> {
         .then((List<Placemark> placemarks) {
       Placemark place = placemarks[0];
       setState(() {
+        _addressLabel = place.subLocality;
         _currentAddress =
             '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
       });
@@ -156,10 +176,7 @@ class _GetLocationState extends State<GetLocation> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => HomePage(
-                              currentPosition: _currentPosition,
-                              currentAddress: _currentAddress,
-                            ),
+                            builder: (context) => const HomePage(),
                           ),
                         );
                       }

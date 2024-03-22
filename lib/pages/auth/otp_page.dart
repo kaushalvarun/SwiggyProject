@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:swiggy/components/general_components/heading.dart';
@@ -15,6 +17,10 @@ class OTPPage extends StatefulWidget {
 }
 
 class OTPPageState extends State<OTPPage> {
+  // firebase instance
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  // db instance
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   // Text editing controllers for each OTP field
   final TextEditingController _otp1Controller = TextEditingController();
   final TextEditingController _otp2Controller = TextEditingController();
@@ -56,11 +62,37 @@ class OTPPageState extends State<OTPPage> {
         _otp5Controller.text +
         _otp6Controller.text;
 
-    AuthService.loginWithOtp(otp: otpRecieved).then((value) {
+    AuthService.loginWithOtp(otp: otpRecieved).then((value) async {
       if (value == "Success") {
         Navigator.pop(context);
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const GetLocation()));
+
+        final user = _firebaseAuth.currentUser!;
+        // Check if data already exists for the user
+        final userDoc = _firestore.collection('users').doc(user.uid);
+        await userDoc.get().then((value) {
+          if (value.exists) {
+            // Data already exists, navigate to GetLocation page
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const GetLocation()),
+            );
+          } else {
+            // Data doesn't exist, add data to Firestore
+            try {
+              userDoc.set({
+                'phoneNo': widget.mobNo,
+              });
+              // Navigate to GetLocation page after adding data
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const GetLocation()),
+              );
+            } catch (e) {
+              // ignore: avoid_print
+              print('Error: can\'t add data to db\n$e');
+            }
+          }
+        });
       } else {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
