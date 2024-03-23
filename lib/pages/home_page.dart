@@ -275,82 +275,94 @@ class _HomePageState extends State<HomePage> {
                           itemBuilder: (context, index) {
                             // Access restaurant data from document snapshot
                             final restaurantDoc = topRatedRestaurants[index];
+
                             final restaurantData =
                                 restaurantDoc.data() as Map<String, dynamic>;
-                            return Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
+                            if (_userAddress != null) {
+                              return Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              const RestaurantPage()));
-                                },
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      height: 170,
-                                      width: 150,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(15),
-                                        child: Image.asset(
-                                          'lib/assets/images/restaurantImages/R${index + 1}.avif',
-                                          fit: BoxFit.fill,
+                                        builder: (context) => RestaurantPage(
+                                          userAddress: _userAddress!,
+                                          restaurantName:
+                                              restaurantData['name'],
                                         ),
                                       ),
-                                    ),
-                                    // Restaurant name
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 2),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                restaurantData['name'] ?? '',
-                                                style: const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ],
+                                    );
+                                  },
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        height: 170,
+                                        width: 150,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          child: Image.asset(
+                                            'lib/assets/images/restaurantImages/R${index + 1}.avif',
+                                            fit: BoxFit.fill,
                                           ),
-
-                                          // rating
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              const Icon(
-                                                Icons.stars,
-                                                color: Colors.green,
-                                              ),
-                                              const SizedBox(width: 5),
-                                              Text(
-                                                  '${restaurantData['rating']}'),
-                                            ],
-                                          ),
-                                          // cuisine
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Text(restaurantData['cuisine'] ??
-                                                  ''),
-                                            ],
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      // Restaurant name
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 2),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  restaurantData['name'] ?? '',
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ],
+                                            ),
+
+                                            // rating
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                const Icon(
+                                                  Icons.stars,
+                                                  color: Colors.green,
+                                                ),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                    '${restaurantData['rating']}'),
+                                              ],
+                                            ),
+                                            // cuisine
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                    restaurantData['cuisine'] ??
+                                                        ''),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            }
+                            return null;
                           }),
                     );
                   }),
