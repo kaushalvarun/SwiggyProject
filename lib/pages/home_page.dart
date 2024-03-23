@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:swiggy/components/general_components/search_bar.dart';
+import 'package:swiggy/pages/restaurant_page.dart';
 import 'package:swiggy/pages/user_profile/logout_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,6 +17,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController controller = TextEditingController();
+
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -228,25 +230,130 @@ class _HomePageState extends State<HomePage> {
               ),
 
               // restaurants
-              // using logic of within 20km get restaurants
-
-              SizedBox(
-                height: 250,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: List.generate(10, (int index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Card(
-                        color: Colors.blue[index * 100],
-                        child: Container(
-                          width: 150.0,
+              StreamBuilder<QuerySnapshot>(
+                  stream: _firestore
+                      .collection('cities')
+                      .doc('Vellore')
+                      .collection('restaurants')
+                      .orderBy('rating', descending: true)
+                      .limit(10)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    // error
+                    if (snapshot.hasError) {
+                      return SizedBox(
+                        height: 250,
+                        child: Center(
+                          child: Text(
+                              'Something went wrong...\n Error: ${snapshot.error}'),
                         ),
-                      ),
+                      );
+                    }
+
+                    // Loading
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const SizedBox(
+                        height: 250,
+                        child: Center(
+                          child: Text('No restuarants available..'),
+                        ),
+                      );
+                    }
+                    // Data available, process and display
+                    final topRatedRestaurants = snapshot.data!.docs;
+
+                    return SizedBox(
+                      height: 250,
+                      child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: topRatedRestaurants.length,
+                          itemBuilder: (context, index) {
+                            // Access restaurant data from document snapshot
+                            final restaurantDoc = topRatedRestaurants[index];
+                            final restaurantData =
+                                restaurantDoc.data() as Map<String, dynamic>;
+                            return Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const RestaurantPage()));
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      height: 170,
+                                      width: 150,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(15),
+                                        child: Image.asset(
+                                          'lib/assets/images/restaurantImages/R${index + 1}.avif',
+                                          fit: BoxFit.fill,
+                                        ),
+                                      ),
+                                    ),
+                                    // Restaurant name
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 2),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                restaurantData['name'] ?? '',
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ],
+                                          ),
+
+                                          // rating
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              const Icon(
+                                                Icons.stars,
+                                                color: Colors.green,
+                                              ),
+                                              const SizedBox(width: 5),
+                                              Text(
+                                                  '${restaurantData['rating']}'),
+                                            ],
+                                          ),
+                                          // cuisine
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(restaurantData['cuisine'] ??
+                                                  ''),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
                     );
                   }),
-                ),
-              ),
             ],
           ),
         ),

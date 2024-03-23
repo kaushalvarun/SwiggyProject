@@ -25,6 +25,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'Futura',
+        textTheme: Theme.of(context).textTheme.apply(fontFamily: 'Futura'),
+      ),
       home: IntroPage(),
     );
   }
