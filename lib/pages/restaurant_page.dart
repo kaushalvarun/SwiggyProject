@@ -10,10 +10,10 @@ import 'package:video_player/video_player.dart';
 
 class RestaurantPage extends StatefulWidget {
   final String userAddress;
-  final String restaurantName;
+  final Restaurant rest;
   const RestaurantPage({
     super.key,
-    required this.restaurantName,
+    required this.rest,
     required this.userAddress,
   });
 
@@ -60,7 +60,10 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => CartPage(order: order)));
+                          builder: (context) => CartPage(
+                                order: order,
+                                restaurant: widget.rest,
+                              )));
                   // Complete the Completer to dismiss the snackbar
                   _snackBarCompleter.complete();
                 },
@@ -113,7 +116,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
           .collection('cities')
           .doc('Vellore')
           .collection('restaurants')
-          .where('name', isEqualTo: widget.restaurantName)
+          .where('name', isEqualTo: widget.rest.name)
           .get();
 
       if (restaurantQuerySnapshot.docs.isNotEmpty) {

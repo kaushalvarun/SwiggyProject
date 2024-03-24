@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:swiggy/components/general_components/search_bar.dart';
 import 'package:swiggy/pages/loading_rest.dart';
 import 'package:swiggy/pages/user_profile/logout_page.dart';
+import 'package:swiggy/restaurant.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -282,6 +283,9 @@ class _HomePageState extends State<HomePage> {
 
                             final restaurantData =
                                 restaurantDoc.data() as Map<String, dynamic>;
+                            final Restaurant rest =
+                                Restaurant.fromJson(restaurantData);
+
                             if (_userAddress != null) {
                               return Padding(
                                 padding: const EdgeInsets.all(5),
@@ -292,8 +296,7 @@ class _HomePageState extends State<HomePage> {
                                       MaterialPageRoute(
                                         builder: (context) => LoadingRest(
                                           userAddress: _userAddress!,
-                                          restaurantName:
-                                              restaurantData['name'],
+                                          rest: rest,
                                         ),
                                       ),
                                     );

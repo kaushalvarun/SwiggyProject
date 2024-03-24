@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:swiggy/components/general_components/custom_loading_spinner.dart';
 import 'package:swiggy/pages/restaurant_page.dart';
+import 'package:swiggy/restaurant.dart';
 import 'package:video_player/video_player.dart';
 
 class LoadingRest extends StatefulWidget {
-  final String restaurantName;
+  final Restaurant rest;
   final String userAddress;
   const LoadingRest({
     super.key,
-    required this.restaurantName,
+    required this.rest,
     required this.userAddress,
   });
 
@@ -24,11 +25,12 @@ class _LoadingRestState extends State<LoadingRest> {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => RestaurantPage(
-                    restaurantName: widget.restaurantName,
-                    userAddress: widget.userAddress)));
+          context,
+          MaterialPageRoute(
+            builder: (context) => RestaurantPage(
+                rest: widget.rest, userAddress: widget.userAddress),
+          ),
+        );
       }
     });
   }

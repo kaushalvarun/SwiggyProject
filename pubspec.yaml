@@ -20,6 +20,9 @@ dependencies:
   json_annotation: ^4.8.1
   video_player: ^2.8.3 
   chewie: ^1.7.5
+  location: ^5.0.3
+  google_maps_flutter: ^2.1.7
+  flutter_polyline_points: ^2.0.0
   flutter_native_splash: ^2.3.10
 
   # The following adds the Cupertino Icons font to your application.
