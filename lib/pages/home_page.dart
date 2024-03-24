@@ -253,8 +253,11 @@ class _HomePageState extends State<HomePage> {
 
                     // Loading
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
+                      return const SizedBox(
+                        height: 250,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
                       );
                     }
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {

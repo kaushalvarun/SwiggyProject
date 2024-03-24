@@ -36,6 +36,7 @@ class _LoadingRestState extends State<LoadingRest> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: (Center(
         child: SizedBox(
             height: 250,

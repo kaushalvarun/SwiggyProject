@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:swiggy/components/general_components/custom_loading_spinner.dart';
+import 'package:swiggy/components/restaurnat_components/menu_category.dart';
+import 'package:swiggy/pages/cart_page.dart';
 import 'package:swiggy/restaurant.dart';
 import 'package:video_player/video_player.dart';
 
@@ -18,6 +22,85 @@ class RestaurantPage extends StatefulWidget {
 }
 
 class _RestaurantPageState extends State<RestaurantPage> {
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+
+  // add to cart snackbar
+  Completer<void> _snackBarCompleter = Completer<void>();
+
+  // Function to show the snackbar
+  void _showSnackBar(BuildContext context, List<int> quantityCnt) {
+    int totalItems = quantityCnt.fold(
+        0, (previousValue, element) => previousValue + element);
+
+    // Dismiss any existing snackbar
+    _scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
+
+    if (totalItems > 0) {
+      final snackBar = SnackBar(
+        backgroundColor: Colors.green[800],
+        content: Container(
+          height: 70,
+          padding: const EdgeInsets.all(15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '$totalItems Items added',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Tahoma',
+                  color: Colors.white,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  // Navigate to view cart page
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CartPage(order: order)));
+                  // Complete the Completer to dismiss the snackbar
+                  _snackBarCompleter.complete();
+                },
+                child: const Text(
+                  'View Cart > ',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Tahoma',
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        duration: Durations.extralong4,
+        // Show the new snackbar
+      );
+      _scaffoldMessengerKey.currentState?.showSnackBar(snackBar);
+
+      // Show the snackbar only if it's not already shown
+      if (!_snackBarCompleter.isCompleted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(snackBar)
+            .closed
+            .then((reason) {
+          // Check if the snackbar is closed due to timeout
+          if (reason == SnackBarClosedReason.timeout) {
+            // Reset the Completer to allow showing the snackbar again
+            _snackBarCompleter = Completer<void>();
+          }
+        });
+      }
+    } else {
+      // If totalItems is 0, dismiss the snackbar if it's showing
+      _snackBarCompleter.complete();
+    }
+  }
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Restaurant? _currRestaurant;
 
@@ -74,61 +157,35 @@ class _RestaurantPageState extends State<RestaurantPage> {
   @override
   void initState() {
     fetchRestaurantDetails();
+    order = [];
     super.initState();
-    _scrollController.addListener(() {
-      _scrollController.addListener(scrollPosition);
-    });
-    _scrollController1.addListener(() {
-      _scrollController1.addListener(scrollPosition1);
-    });
-    _scrollController2.addListener(() {
-      _scrollController1.addListener(scrollPosition2);
-    });
   }
 
-// scroll control
-  final ScrollController _scrollController = ScrollController();
-  final ScrollController _scrollController1 = ScrollController();
-  final ScrollController _scrollController2 = ScrollController();
-  var isTopPosition = 0.0;
-  var isTopPosition1 = 0.0;
-  var isTopPosition2 = 0.0;
+  // scroll control
+  final ScrollController _scrollController = ScrollController(
+    keepScrollOffset: true,
+    initialScrollOffset: 0.0,
+  );
+  final ScrollController _scrollController1 = ScrollController(
+    keepScrollOffset: true,
+    initialScrollOffset: 0.0,
+  );
 
-  void scrollPosition() {
-    final isTop = _scrollController.position.pixels;
-
-    setState(() {
-      isTopPosition = isTop;
-    });
-  }
-
-  void scrollPosition1() {
-    final isTop1 = _scrollController1.position.pixels;
-
-    setState(() {
-      isTopPosition1 = isTop1;
-    });
-  }
-
-  void scrollPosition2() {
-    final isTop2 = _scrollController2.position.pixels;
-
-    setState(() {
-      isTopPosition2 = isTop2;
-    });
-  }
+  // order
+  late List<Map<String, dynamic>> order;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldMessengerKey,
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(233, 232, 241, 1),
       ),
       body: (_currRestaurant == null || menuCategories.isEmpty || menu.isEmpty)
           ? (Center(
               child: SizedBox(
-                  height: 100,
-                  width: 100,
+                  height: 250,
+                  width: 250,
                   child: AspectRatio(
                     aspectRatio: 1.0,
                     child: (CustomLoadingSpinner(
@@ -367,6 +424,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                       const SizedBox(height: 20),
                       Container(
                         width: MediaQuery.of(context).size.width * 0.9,
+
                         // discount banner
                         decoration: BoxDecoration(
                             border: Border.all(color: Colors.black, width: 0.5),
@@ -474,122 +532,26 @@ class _RestaurantPageState extends State<RestaurantPage> {
                             controller: _scrollController1,
                             itemCount: menuCategories.length,
                             itemBuilder: (context, index) {
-                              return Container(
-                                padding: const EdgeInsets.all(5),
-                                margin: const EdgeInsets.only(bottom: 15),
-                                color: Colors.white,
-                                child: ExpansionTile(
-                                  title: Text(
-                                    menuCategories[index],
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 18,
-                                        fontFamily: 'Tahoma'),
-                                  ),
-                                  children: [
-                                    ListView.builder(
-                                        controller: _scrollController2,
-                                        shrinkWrap: true,
-                                        itemCount: menu[index]['dishes'].length,
-                                        itemBuilder: (context, indexMenuCat) {
-                                          bool veg = (menu[index]['dishes']
-                                                          [indexMenuCat]
-                                                      ['veg_or_non_veg'] ==
-                                                  'Veg')
-                                              ? true
-                                              : false;
-                                          // dish
-                                          return Padding(
-                                            padding: const EdgeInsets.all(10),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    (veg)
-                                                        ? Image.asset(
-                                                            'lib/assets/images/veg.png',
-                                                            height: 20,
-                                                            width: 20,
-                                                          )
-                                                        : Image.asset(
-                                                            'lib/assets/images/nonveg.png',
-                                                            height: 20,
-                                                            width: 20,
-                                                          ),
-                                                    const SizedBox(height: 5),
-                                                    Container(
-                                                      constraints:
-                                                          const BoxConstraints(
-                                                        maxWidth: 150,
-                                                      ),
-                                                      child: Text(
-                                                        menu[index]['dishes']
-                                                                [indexMenuCat]
-                                                            ['dish_name'],
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          fontFamily: 'Tahoma',
-                                                        ),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      menu[index]['dishes']
-                                                              [indexMenuCat]
-                                                          ['price'],
-                                                      style: const TextStyle(
-                                                          fontSize: 15),
-                                                    ),
-                                                    const SizedBox(height: 10),
-                                                  ],
-                                                ),
-                                                // add to cart button
-                                                GestureDetector(
-                                                  onTap: () {},
-                                                  child: Container(
-                                                    width: 100,
-                                                    height: 45,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10.0),
-                                                      color: Colors.white,
-                                                      border: Border.all(
-                                                        color:
-                                                            Colors.grey[700]!,
-                                                        width: 0.5,
-                                                      ),
-                                                    ),
-                                                    child: Center(
-                                                      child: Text(
-                                                        'ADD',
-                                                        style: TextStyle(
-                                                          color:
-                                                              Colors.green[700],
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 16,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        }),
-                                  ],
-                                ),
+                              // dish management
+                              List<bool> addButtonTapped = List<bool>.filled(
+                                  menu[index]['dishes'].length, false);
+                              List<int> quantityCnt = List<int>.filled(
+                                  menu[index]['dishes'].length, 0);
+                              return MenuCategory(
+                                order: order,
+                                itemCount: menu[index]['dishes'].length,
+                                menuCategories: menuCategories[index],
+                                addButtonTapped: addButtonTapped,
+                                quantityCnt: quantityCnt,
+                                dishMap: menu[index]['dishes'],
+                                onQuantityChanged: (updatedQuantityCnt) {
+                                  _showSnackBar(context, updatedQuantityCnt);
+                                },
+                                onOrderChanged: (neworder) {
+                                  setState(() {
+                                    order = neworder;
+                                  });
+                                },
                               );
                             },
                           ),
