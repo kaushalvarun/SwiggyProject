@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:swiggy/components/general_components/search_bar.dart';
-import 'package:swiggy/pages/restaurant_page.dart';
+import 'package:swiggy/pages/loading_rest.dart';
 import 'package:swiggy/pages/user_profile/logout_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -82,6 +82,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.white,
       // app bar
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         toolbarHeight: MediaQuery.of(context).size.width * 0.15,
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
@@ -286,7 +287,7 @@ class _HomePageState extends State<HomePage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => RestaurantPage(
+                                        builder: (context) => LoadingRest(
                                           userAddress: _userAddress!,
                                           restaurantName:
                                               restaurantData['name'],

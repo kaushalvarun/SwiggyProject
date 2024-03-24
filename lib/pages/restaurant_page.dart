@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:swiggy/components/general_components/custom_loading_spinner.dart';
 import 'package:swiggy/restaurant.dart';
+import 'package:video_player/video_player.dart';
 
 class RestaurantPage extends StatefulWidget {
   final String userAddress;
@@ -123,9 +125,19 @@ class _RestaurantPageState extends State<RestaurantPage> {
         backgroundColor: const Color.fromRGBO(233, 232, 241, 1),
       ),
       body: (_currRestaurant == null || menuCategories.isEmpty || menu.isEmpty)
-          ? (const Center(
+          ? (Center(
               child: SizedBox(
-                  height: 50, width: 50, child: (CircularProgressIndicator())),
+                  height: 100,
+                  width: 100,
+                  child: AspectRatio(
+                    aspectRatio: 1.0,
+                    child: (CustomLoadingSpinner(
+                      videoPlayerController: VideoPlayerController.asset(
+                          'lib/assets/videos/restaurantLoading.mp4'),
+                      looping: true,
+                      autoplay: true,
+                    )),
+                  )),
             ))
           : SingleChildScrollView(
               controller: _scrollController,
